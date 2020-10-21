@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private float maxSpeed;
     private Vector3 playerScale;
     private bool isGrounded;
+    private Vector3 standingOnAngle;
 
     // Multipliers.
     private float movementMultiplier = 1.0f;
@@ -82,11 +83,16 @@ public class PlayerController : MonoBehaviour
         {
             isGrounded = false;
             rb.AddForce(0, 5.0f * mass, 0, ForceMode.Impulse);
+            rb.AddForce(standingOnAngle * 1.0f * mass, ForceMode.Impulse);
         }
     }
 
     private void Crouch()
     {
+        if (Vector3.Angle(Vector3.up, standingOnAngle) > 10.0f)
+        {
+            rb.AddForce(Vector3.down * 500f * mass);
+        }
         transform.localScale = new Vector3(playerScale.x, playerScale.y / 2, playerScale.z);
     }
     private void Uncrouch()
@@ -156,11 +162,39 @@ public class PlayerController : MonoBehaviour
         foreach (ContactPoint contact in collision.contacts)
         {
             Vector3 normal = contact.normal;
-            if (Vector3.Angle(Vector3.up, normal) == 0.0f)
+            if (Vector3.Angle(Vector3.up, normal) <= 70.0f)
             {
                 isGrounded = true;
+                standingOnAngle = normal;
             }
         }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (0 == collision.contactCount)
+        {
+            IsInAir();
+            return;
+        }
+
+        bool isInAir = true;
+
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (Vector3.Angle(Vector3.up, contact.normal) <= 70.0f)
+            {
+                isInAir = false;
+            }
+        }
+
+        if (isInAir) IsInAir();
+    }
+
+    private void IsInAir()
+    {
+        isGrounded = false;
+        standingOnAngle = Vector3.zero;
     }
 
 }

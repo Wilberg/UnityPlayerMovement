@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour
     public PlayerController player;
 
     public float sensitivity = 3.0f;
-    private float sensitivityMultiplier = 200.0f;
+    private float sensitivityMultiplier = 300.0f;
 
     private float mouseX = 0f;
     private float mouseY = 0f;
